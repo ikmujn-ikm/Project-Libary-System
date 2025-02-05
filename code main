@@ -1,0 +1,249 @@
+#include <iostream>
+#include <string>
+#include <queue>
+
+using namespace std;
+
+class Library {
+    struct Book {
+        string title;
+        string author;
+        string publisher;
+        int year;
+        string genre;
+        bool is_best_seller;
+        Book* next;
+    };
+
+    Book* head;
+
+public:
+    Library() : head(nullptr) {}
+    ~Library() {
+        while (head) {
+            Book* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+
+    void add_book(const string& title, const string& author, const string& publisher, int year, const string& genre, bool is_best_seller);
+    void display_books() const;
+    void reject_book();
+    void choose_edition() const;
+    void view_book_details() const;
+    void view_best_sellers() const;
+    void search_book(const string& query) const;
+    void sort_books_by_title();
+};
+
+void Library::add_book(const string& title, const string& author, const string& publisher, int year, const string& genre, bool is_best_seller) {
+    Book* new_book = new Book{ title, author, publisher, year, genre, is_best_seller, nullptr };
+    if (!head) {
+        head = new_book;
+    }
+    else {
+        Book* temp = head;
+        while (temp->next) {
+            temp = temp->next;
+        }
+        temp->next = new_book;
+    }
+}
+
+void Library::display_books() const {
+    cout << "\nAvailable Books:\n";
+    Book* temp = head;
+    while (temp) {
+        cout << "- " << temp->title << " by " << temp->author << " (" << temp->year << ")\n";
+        temp = temp->next;
+    }
+}
+
+void Library::reject_book() {
+    cout << "\nEnter the title of the book to reject: ";
+    string title;
+    cin.ignore();
+    getline(cin, title);
+    Book* temp = head;
+    Book* prev = nullptr;
+    while (temp) {
+        if (temp->title == title) {
+            if (prev) {
+                prev->next = temp->next;
+            }
+            else {
+                head = temp->next;
+            }
+            delete temp;
+            cout << "Book rejected successfully.\n";
+            return;
+        }
+        prev = temp;
+        temp = temp->next;
+    }
+    cout << "Book not found.\n";
+}
+
+void Library::choose_edition() const {
+    cout << "\nEnter the title of the book to choose an edition for: ";
+    string title;
+    cin.ignore();
+    getline(cin, title);
+    Book* temp = head;
+    while (temp) {
+        if (temp->title == title) {
+            cout << "\nAvailable editions for \"" << temp->title << "\":\n";
+            cout << "1. Standard Edition\n2. Deluxe Edition\n3. Collector's Edition\n";
+            cout << "Choose an edition (1-3): ";
+            int choice;
+            cin >> choice;
+            if (choice >= 1 && choice <= 3) {
+                cout << "You selected edition " << choice << ".\n";
+            }
+            else {
+                cout << "Invalid choice.\n";
+            }
+            return;
+        }
+        temp = temp->next;
+    }
+    cout << "Book not found.\n";
+}
+
+void Library::view_book_details() const {
+    cout << "\nEnter the title of the book to view details: ";
+    string title;
+    cin.ignore();
+    getline(cin, title);
+    Book* temp = head;
+    while (temp) {
+        if (temp->title == title) {
+            cout << "\nDetails for \"" << temp->title << "\":\n";
+            cout << "Author: " << temp->author << "\n";
+            cout << "Publisher: " << temp->publisher << "\n";
+            cout << "Year: " << temp->year << "\n";
+            cout << "Genre: " << temp->genre << "\n";
+            cout << "Best Seller: " << (temp->is_best_seller ? "Yes" : "No") << "\n";
+            return;
+        }
+        temp = temp->next;
+    }
+    cout << "Book not found.\n";
+}
+
+void Library::view_best_sellers() const {
+    cout << "\nBest Sellers:\n";
+    Book* temp = head;
+    while (temp) {
+        if (temp->is_best_seller) {
+            cout << "- " << temp->title << " by " << temp->author << "\n";
+        }
+        temp = temp->next;
+    }
+}
+
+void Library::search_book(const string& query) const {
+    Book* temp = head;
+    while (temp) {
+        if (temp->title == query || temp->author == query) {
+            cout << "Found: " << temp->title << " by " << temp->author << endl;
+            return;
+        }
+        temp = temp->next;
+    }
+    cout << "Book not found.\n";
+}
+
+void Library::sort_books_by_title() {
+    if (!head) return;
+
+    bool swapped;
+    do {
+        swapped = false;
+        Book* current = head;
+        while (current->next) {
+            if (current->title > current->next->title) {
+                swap(current->title, current->next->title);
+                swap(current->author, current->next->author);
+                swap(current->publisher, current->next->publisher);
+                swap(current->year, current->next->year);
+                swap(current->genre, current->next->genre);
+                swap(current->is_best_seller, current->next->is_best_seller);
+                swapped = true;
+            }
+            current = current->next;
+        }
+    } while (swapped);
+}
+
+void welcome(Library& library) {
+    cout << "\t\t|-----------------------------------------------|\n";
+    cout << "\t\t|           WELCOME TO THE LIBRARY SYSTEM        |\n";
+    cout << "\t\t|-----------------------------------------------|\n";
+    cout << "\t\t|  1) VIEW BOOKS                                |\n";
+    cout << "\t\t|  2) REJECT A BOOK                             |\n";
+    cout << "\t\t|  3) CHOOSE BOOK EDITION                       |\n";
+    cout << "\t\t|  4) VIEW BOOK DETAILS                         |\n";
+    cout << "\t\t|  5) VIEW BEST SELLERS                         |\n";
+    cout << "\t\t|  6) SEARCH FOR A BOOK                         |\n";
+    cout << "\t\t|  7) SORT BOOKS BY TITLE                      |\n";
+    cout << "\t\t|  8) EXIT                                      |\n";
+    cout << "\t\t|-----------------------------------------------|\n";
+
+    int choice;
+    do {
+        cout << "Enter your choice: ";
+        cin >> choice;
+        switch (choice) {
+        case 1:
+            library.display_books();
+            break;
+        case 2:
+            library.reject_book();
+            break;
+        case 3:
+            library.choose_edition();
+            break;
+        case 4:
+            library.view_book_details();
+            break;
+        case 5:
+            library.view_best_sellers();
+            break;
+        case 6: {
+            cout << "Enter title or author to search: ";
+            string query;
+            cin.ignore();
+            getline(cin, query);
+            library.search_book(query);
+            break;
+        }
+        case 7:
+            library.sort_books_by_title();
+            cout << "Books sorted by title.\n";
+            break;
+        case 8:
+            cout << "Exiting...\n";
+            break;
+        default:
+            cout << "Invalid choice. Try again.\n";
+            break;
+        }
+    } while (choice != 8);
+}
+
+int main() {
+    Library library;
+    
+      library.add_book("Abai Zholy", "Mukhtar Auezov", "", 1980, "Prose", true);
+      library.add_book("Gauhar Tas", "Dulata Isabekova", "", 2000, "Prose", false);
+      library.add_book("Kar Kyzy", "Oralkhan Bokei", "", 1995, "Prose", true);
+      library.add_book("Aqikattan Attaug'a Bolmaydy", "Dinmukhamed Kunayev", "", 2005, "Prose", false);
+
+
+
+    welcome(library);
+    return 0;
+}
+
